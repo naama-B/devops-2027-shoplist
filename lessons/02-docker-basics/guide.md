@@ -196,13 +196,20 @@ CMD ["python", "app.py"]
 | `EXPOSE 5000` | תיעוד בלבד. **לא פותח את הפורט** |
 | `CMD ["python", "app.py"]` | מה רץ כשה-container עולה |
 
-> **ברשת של נטפרי:** `pip install` בתוך ה-build נכשל עם שגיאת SSL (`CERTIFICATE_VERIFY_FAILED`), כי נטפרי בודק את התעבורה, וה-container לא מכיר את התעודה שלו. הפתרון: להגיד ל-pip לסמוך על השרתים שמהם הוא מוריד ספריות. משנים את שורת ה-`pip install`:
+> **ברשת של הכיתה (נטפרי):** `pip install` בתוך ה-build נכשל עם שגיאת SSL, כי ה-container לא מכיר את תעודת נטפרי. מוסיפים את הבלוק הזה **מתחת לשורת ה-`FROM`**:
 >
 > ```dockerfile
-> RUN pip install --no-cache-dir --trusted-host pypi.org --trusted-host files.pythonhosted.org -r requirements.txt
+> # --- NetFree: רק ברשת של הכיתה ---
+> ADD https://netfree.link/dl/unix-ca.sh /home/netfree-unix-ca.sh
+> RUN cat /home/netfree-unix-ca.sh | sh
+> ENV NODE_EXTRA_CA_CERTS=/etc/ca-bundle.crt
+> ENV REQUESTS_CA_BUNDLE=/etc/ca-bundle.crt
+> ENV SSL_CERT_FILE=/etc/ca-bundle.crt
+> ENV PIP_CERT=/etc/ca-bundle.crt
+> # --- סוף NetFree ---
 > ```
 >
-> `pypi.org` ו-`files.pythonhosted.org` הם השרתים של PyPI, המאגר של ספריות Python. בלי נטפרי, לא צריך את הדגלים.
+> הבלוק מתקין את תעודת נטפרי בתוך ה-image. הוא לא מזיק גם ברשת אחרת.
 
 ---
 
@@ -248,7 +255,7 @@ EXPOSE 3000
 CMD ["node", "server.js"]
 ```
 
-אין שורת `RUN`: לסרוויס אין ספריות חיצוניות, ולכן אין מה להתקין. ה-build מהיר מאוד, וגם לא צריך את הדגלים של נטפרי.
+אין שורת `RUN`: לסרוויס אין ספריות חיצוניות, ולכן אין מה להתקין. ה-build מהיר מאוד, וגם לא צריך את בלוק נטפרי.
 
 **ולמה בכל זאת מעתיקים את `package.json`?** זה כרטיס הזהות של פרויקט Node.js: השם, הגרסה ופקודת ההפעלה. היום אין בו תלויות, אבל ברגע שיתווספו, יהיה צריך להוסיף אחריו `RUN npm install`, בדיוק כמו `requirements.txt` ב-backend. כך ה-Dockerfile כבר מוכן לזה.
 
