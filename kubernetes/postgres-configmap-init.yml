@@ -1,6 +1,6 @@
 # postgres-configmap.yml - init.sql, creates the table on first start
 apiVersion: v1
-kind: Configmap                  # which resource stores regular (non-secret) configuration?
+kind: ConfigMap                  # which resource stores regular (non-secret) configuration?
 metadata:
   name: postgres-init       # postgres-deployment mounts it by this exact name
   namespace: shoplist
