@@ -6,4 +6,11 @@ metadata:
   namespace: shoplist
 data:
   init.sql: |                   # file name inside the container (same as in the sql/ folder)
-    -- replace this line with the content of sql/init.sql, indented by 4 spaces
+    CREATE TABLE IF NOT EXISTS products (
+    id        SERIAL PRIMARY KEY,
+    name      VARCHAR(100) NOT NULL,
+    price     NUMERIC(10, 2) NOT NULL,
+    quantity  INTEGER NOT NULL DEFAULT 1,
+    category  VARCHAR(30) NOT NULL DEFAULT 'Other',
+    bought    BOOLEAN NOT NULL DEFAULT FALSE
+);
